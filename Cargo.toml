@@ -4,8 +4,7 @@ version = "0.1.0"
 authors = ["Geoffroy Couprie <geo.couprie@gmail.com>"]
 
 [dependencies]
-libc = "*"
-lazy_static = "*"
+libc = "^0.2"
 
 #[profile.dev]
 #panic = 'abort'
