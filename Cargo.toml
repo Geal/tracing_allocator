@@ -5,6 +5,5 @@ authors = ["Geoffroy Couprie <geo.couprie@gmail.com>"]
 
 [dependencies]
 libc = "^0.2"
+time = "^0.1"
 
-#[profile.dev]
-#panic = 'abort'

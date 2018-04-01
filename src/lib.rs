@@ -1,6 +1,7 @@
 #![feature(global_allocator, allocator_api, heap_api)]
 
 extern crate libc;
+extern crate time;
 
 use std::heap::{Alloc, System, Layout, AllocErr};
 use std::fs::File;
@@ -8,7 +9,6 @@ use std::mem;
 use std::os::unix::io::AsRawFd;
 use libc::c_void;
 use std::process;
-
 
 static mut TRACE_FD:i32 = 0;
 
@@ -47,20 +47,39 @@ enum Action {
 
 unsafe fn print_size(address: usize, size: usize, action: Action) {
   if TRACE_FD != 0 {
-    let mut buf: [u8; 38] = mem::uninitialized();
+    let mut buf: [u8; 100] = mem::uninitialized();
+    let psz = mem::size_of::<usize>();
+    let shr = (psz as u32)*8 - 8;
+    let mut index = 0;
+
+    let mut counter = 8;
+
+    let c = time::precise_time_ns() as usize;
+    loop {
+      if counter == 0 {
+        break;
+      }
+
+      let current = ((c.overflowing_shl(64 - 8*counter as u32).0).overflowing_shr(shr).0) as u8;
+      buf[index] = to_hex(current >> 4);
+      buf[index+1] = to_hex( (current << 4) >> 4);
+
+      counter -= 1;
+      index += 2;
+    }
+
+    buf[index] = b' ';
+    index += 1;
+
     match action {
-      Action::Allocating => buf[0] = b'A',
-      Action::Deallocating => buf[0] = b'D',
+      Action::Allocating => buf[index] = b'A',
+      Action::Deallocating => buf[index] = b'D',
     };
 
-    buf[1] = b' ';
+    buf[index+1] = b' ';
+    index += 2;
 
-    let psz = mem::size_of::<usize>();
-    let mut counter = 8;
-    let mut index = 2;
-
-    let shr = (psz as u32)*8 - 8;
-
+    counter = 8;
     let c = address;
     loop {
       if counter == 0 {
@@ -95,7 +114,8 @@ unsafe fn print_size(address: usize, size: usize, action: Action) {
 
     libc::write(TRACE_FD,
       buf.as_ptr() as *const c_void,
-      buf.len());
+      index+1);
+      //buf.len());
   }
 
 }
