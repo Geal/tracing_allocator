@@ -11,8 +11,7 @@ fn main() {
   let f = File::create("trace.txt").unwrap();
   tracing_allocator::Allocator::initialize(&f);
 
-  let s = String::from("03AB");
-  //println!("starting");
+  let s = String::from("Hello world!");
 
   let mut v = Vec::new();
   v.push(1);
