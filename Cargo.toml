@@ -1,0 +1,11 @@
+[package]
+name = "tracing-allocator"
+version = "0.1.0"
+authors = ["Geoffroy Couprie <geo.couprie@gmail.com>"]
+
+[dependencies]
+libc = "*"
+lazy_static = "*"
+
+#[profile.dev]
+#panic = 'abort'
