@@ -10,7 +10,7 @@ use std::os::unix::io::AsRawFd;
 use libc::c_void;
 use std::process;
 
-static mut TRACE_FD:i32 = 0;
+static mut TRACE_FD:i32 = -1;
 
 pub struct Allocator {
 }
@@ -46,7 +46,7 @@ enum Action {
 }
 
 unsafe fn print_size(address: usize, size: usize, action: Action) {
-  if TRACE_FD != 0 {
+  if TRACE_FD != -1 {
     let mut buf: [u8; 100] = mem::uninitialized();
     let psz = mem::size_of::<usize>();
     let shr = (psz as u32)*8 - 8;
