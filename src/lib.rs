@@ -11,6 +11,7 @@ use libc::c_void;
 use std::process;
 
 static mut TRACE_FD:i32 = -1;
+static mut TRACE_ACTIVATE:bool = false;
 
 pub struct Allocator {
 }
@@ -24,6 +25,18 @@ impl Allocator {
   pub fn initialize(f: &File) {
     unsafe {
       TRACE_FD = f.as_raw_fd();
+    }
+  }
+
+  pub fn activate() {
+    unsafe {
+      TRACE_ACTIVATE = true;
+    }
+  }
+
+  pub fn deactivate() {
+    unsafe {
+      TRACE_ACTIVATE = false;
     }
   }
 }
@@ -46,7 +59,7 @@ enum Action {
 }
 
 unsafe fn print_size(address: usize, size: usize, action: Action) {
-  if TRACE_FD != -1 {
+  if TRACE_FD != -1 && TRACE_ACTIVATE {
     let mut buf: [u8; 100] = mem::uninitialized();
     let psz = mem::size_of::<usize>();
     let shr = (psz as u32)*8 - 8;

@@ -17,6 +17,7 @@ static GLOBAL: tracing_allocator::Allocator = tracing_allocator::Allocator{};
 fn main() {
   let f = File::create("trace.txt").unwrap();
   tracing_allocator::Allocator::initialize(&f);
+  tracing_allocator::Allocator::activate();
 
   let s = String::from("Hello world!");
 
@@ -40,3 +41,6 @@ Columns:
 - memory address
 - size
 
+
+You can use the `activate` and `deactivate` methods to start
+and stop collection at any time.
