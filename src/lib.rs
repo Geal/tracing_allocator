@@ -3,15 +3,16 @@
 extern crate libc;
 extern crate time;
 
-use std::heap::{Alloc, System, Layout, AllocErr};
-use std::fs::File;
 use std::mem;
-use std::os::unix::io::AsRawFd;
-use libc::c_void;
 use std::process;
+use std::fs::File;
+use std::os::unix::io::AsRawFd;
+use std::heap::{Alloc, System, Layout, AllocErr};
+use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
+use libc::c_void;
 
 static mut TRACE_FD:i32 = -1;
-static mut TRACE_ACTIVATE:bool = false;
+static TRACE_ACTIVATE: AtomicBool = ATOMIC_BOOL_INIT;
 
 pub struct Allocator {
 }
@@ -29,15 +30,11 @@ impl Allocator {
   }
 
   pub fn activate() {
-    unsafe {
-      TRACE_ACTIVATE = true;
-    }
+    TRACE_ACTIVATE.store(true, Ordering::Relaxed);
   }
 
   pub fn deactivate() {
-    unsafe {
-      TRACE_ACTIVATE = false;
-    }
+    TRACE_ACTIVATE.store(false, Ordering::Relaxed);
   }
 }
 
@@ -59,7 +56,7 @@ enum Action {
 }
 
 unsafe fn print_size(address: usize, size: usize, action: Action) {
-  if TRACE_FD != -1 && TRACE_ACTIVATE {
+  if TRACE_FD != -1 && TRACE_ACTIVATE.load(Ordering::Relaxed) {
     let mut buf: [u8; 100] = mem::uninitialized();
     let psz = mem::size_of::<usize>();
     let shr = (psz as u32)*8 - 8;
