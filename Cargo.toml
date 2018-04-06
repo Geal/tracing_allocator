@@ -1,5 +1,11 @@
 [package]
 name = "tracing-allocator"
+description = "track allocations and deallocations"
+license = "MIT"
+repository = "https://github.com/geal/tracing_allocator"
+readme = "README.md"
+keywords = ["allocator", "debugging"]
+categories = ["development-tools", "memory-management"]
 version = "0.1.0"
 authors = ["Geoffroy Couprie <geo.couprie@gmail.com>"]
 
