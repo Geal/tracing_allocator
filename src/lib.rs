@@ -1,4 +1,4 @@
-#![feature(global_allocator, allocator_api, heap_api)]
+#![feature(allocator_api)]
 
 extern crate libc;
 extern crate time;
@@ -7,7 +7,7 @@ use std::mem;
 use std::process;
 use std::fs::File;
 use std::os::unix::io::AsRawFd;
-use std::heap::{Alloc, System, Layout, AllocErr};
+use std::alloc::{GlobalAlloc, System, Layout, AllocErr};
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT, Ordering};
 use libc::c_void;
 
@@ -130,17 +130,17 @@ unsafe fn print_size(address: usize, size: usize, action: Action) {
 
 }
 
-unsafe impl<'a> Alloc for &'a Allocator {
-  unsafe fn alloc(&mut self, layout: Layout) -> Result<*mut u8, AllocErr> {
+unsafe impl GlobalAlloc for Allocator {
+  #[track_caller]
+  unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
     let size = layout.size();
-    let res = System.alloc(layout);
-    if let Ok(p) = res {
-      print_size(p as usize, size, Action::Allocating);
-    }
-    res
+    let p = System.alloc(layout);
+    print_size(p as usize, size, Action::Allocating);
+    p
   }
 
-  unsafe fn dealloc(&mut self, ptr: *mut u8, layout: Layout) {
+  #[track_caller]
+  unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
     print_size(ptr as usize, layout.size(), Action::Deallocating);
     System.dealloc(ptr, layout)
   }

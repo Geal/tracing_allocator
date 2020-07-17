@@ -1,5 +1,3 @@
-#![feature(global_allocator)]
-
 extern crate tracing_allocator;
 
 use std::fs::File;
